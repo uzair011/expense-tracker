@@ -7,9 +7,9 @@ import { Ionicons } from "@expo/vector-icons";
 
 import RecentExpenses from "./screens/RecentExpenses";
 import AllExpenses from "./screens/AllExpenses";
-
 import ManageExpenses from "./screens/ManageExpenses";
 import { GlobalStyles } from "./constants/Styles";
+import IconButton from "./components/ui/IconButton";
 
 const bottomTabs = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -17,12 +17,22 @@ const Stack = createNativeStackNavigator();
 function ExpenseOverview() {
   return (
     <bottomTabs.Navigator
-      screenOptions={{
+      screenOptions={({ navigation }) => ({
         headerStyle: { backgroundColor: GlobalStyles.colors.primary900 },
         headerTintColor: "white",
         tabBarStyle: { backgroundColor: GlobalStyles.colors.primary900 },
         tabBarActiveTintColor: GlobalStyles.colors.accent900,
-      }}
+        headerRight: ({ tintColor }) => (
+          <IconButton
+            icon="add"
+            size={24}
+            color={tintColor}
+            onPress={() => {
+              navigation.navigate("Manage Expenses");
+            }}
+          />
+        ),
+      })}
     >
       <bottomTabs.Screen
         name="Recent Expenses"
@@ -55,13 +65,26 @@ export default function App() {
     <>
       <StatusBar style="light" />
       <NavigationContainer>
-        <Stack.Navigator>
+        <Stack.Navigator
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: GlobalStyles.colors.primary900,
+            },
+            headerTintColor: "white",
+          }}
+        >
           <Stack.Screen
             name="Expenses Overview"
             component={ExpenseOverview}
             options={{ headerShown: false }}
           />
-          <Stack.Screen name="Manage Expenses" component={ManageExpenses} />
+          <Stack.Screen
+            name="Manage Expenses"
+            component={ManageExpenses}
+            options={{
+              presentation: "modal",
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </>

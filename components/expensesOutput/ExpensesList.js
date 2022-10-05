@@ -4,13 +4,6 @@ import ExpenseItem from "./ExpenseItem";
 
 function expenseRenderItem(itemData) {
   return <ExpenseItem {...itemData.item} />;
-  // (
-  //   <View>
-  //     <Text>{itemData.item.description}</Text>
-  //     <Text>{itemData.item.amount}</Text>
-  //     {/* <Text>{itemData.item.date}</Text> */}
-  //   </View>
-  // );
 }
 
 function ExpenseList({ expenses }) {
