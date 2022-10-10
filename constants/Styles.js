@@ -7,5 +7,6 @@ export const GlobalStyles = {
     accent200: "#2f85e2fb",
     accent900: "#004084fb",
     error900: "#920000fb",
+    error100: "#944343fb",
   },
 };
