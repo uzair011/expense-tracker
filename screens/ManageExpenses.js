@@ -5,6 +5,7 @@ import IconButton from "../components/ui/IconButton";
 import { GlobalStyles } from "../constants/Styles";
 import { ExepnsesContext } from "../store/Expenses-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import { StoreExpense } from "../utils/http";
 
 function ManageExpenses({ route, navigation }) {
   const expensesCtx = useContext(ExepnsesContext);
@@ -37,6 +38,7 @@ function ManageExpenses({ route, navigation }) {
     if (isEditing) {
       expensesCtx.updateExpense(editedExpenseId, expenseData);
     } else {
+      StoreExpense(expenseData);
       expensesCtx.addExpense(expenseData);
     }
   }
