@@ -1,13 +1,18 @@
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 
 import IconButton from "../components/ui/IconButton";
 import { GlobalStyles } from "../constants/Styles";
 import { ExepnsesContext } from "../store/Expenses-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
-import { StoreExpense } from "../utils/http";
+import { StoreExpense, updateExpense, deleteExpense } from "../utils/http";
+import LoadingOverlay from "../components/ui/LoadingOverlay";
+import ErrorOverlay from "../components/ui/ErrorOverlay";
 
 function ManageExpenses({ route, navigation }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setIsError] = useState();
+
   const expensesCtx = useContext(ExepnsesContext);
 
   const editedExpenseId = route.params?.expenseId;
@@ -23,24 +28,55 @@ function ManageExpenses({ route, navigation }) {
     });
   }, [navigation, isEditing]);
 
-  function deleteExpenseHandler() {
-    navigation.goBack();
-    expensesCtx.deleteExpense(editedExpenseId);
+  async function deleteExpenseHandler() {
+    // *
+    setIsSubmitting(true);
+    // setIsError(true); //===================
+
+    try {
+      await deleteExpense(editedExpenseId); // sending delete request to the backend - firebase
+      //  setIsSubmitting(false);  // because we are closing the screen by going back
+      expensesCtx.deleteExpense(editedExpenseId); // deleting localy
+      navigation.goBack();
+    } catch (error) {
+      error("An error occoured while deleting...");
+      setIsSubmitting(false);
+    }
   }
 
   function cancelButtonHandler() {
     navigation.goBack();
   }
 
-  function confirmButtonHandler(expenseData) {
-    navigation.goBack();
+  async function confirmButtonHandler(expenseData) {
+    setIsSubmitting(true);
+    try {
+      if (isEditing) {
+        await updateExpense(editedExpenseId, expenseData); // sending update request to the backend - firebase
+        expensesCtx.updateExpense(editedExpenseId, expenseData); // updating localy
+      } else {
+        // getting the Id form the firebase
+        const id = await StoreExpense(expenseData);
+        expensesCtx.addExpense({ ...expenseData, id: id });
+      }
 
-    if (isEditing) {
-      expensesCtx.updateExpense(editedExpenseId, expenseData);
-    } else {
-      StoreExpense(expenseData);
-      expensesCtx.addExpense(expenseData);
+      navigation.goBack();
+    } catch (error) {
+      setIsError("Could not save data. Please try again later.");
+      setIsSubmitting(false);
     }
+  }
+
+  if (isSubmitting) {
+    return <LoadingOverlay />;
+  }
+
+  function deleteErrorHandler() {
+    setIsError(null);
+  }
+
+  if (error && !isSubmitting) {
+    return <ErrorOverlay message={error} onConfirm={deleteErrorHandler} />;
   }
 
   return (
